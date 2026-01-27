@@ -1,18 +1,41 @@
 :root {
+  --color-bg: #1e1e1e;
+  --color-surface: #252526;
+  --color-surface-alt: #1a1a1a;
+  --color-border: #3e3e42;
+  --color-text: #cccccc;
+  --color-text-muted: #858585;
+  --color-primary: #7c3aed;
+  --color-primary-hover: #8b5cf6;
+  --color-danger: #f48771;
+  --color-danger-hover: #ff9e8a;
+  --color-success: #4ec9b0;
+  --color-accent: #dcdcaa;
+  --color-item-hover: rgba(255, 255, 255, 0.06);
+  --color-item-active: rgba(124, 58, 237, 0.2);
+  --sidebar-width: 280px;
+  --header-height: 56px;
+  --radius: 6px;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Light mode - optional, can be toggled */
+:root.light-mode {
   --color-bg: #f8f9fa;
   --color-surface: #ffffff;
+  --color-surface-alt: #f1f3f5;
   --color-border: #dee2e6;
   --color-text: #212529;
   --color-text-muted: #6c757d;
-  --color-primary: #4a6fa5;
-  --color-primary-hover: #3a5a8a;
+  --color-primary: #6d28d9;
+  --color-primary-hover: #5b21b6;
   --color-danger: #dc3545;
   --color-danger-hover: #bb2d3b;
   --color-success: #198754;
   --color-accent: #e8a838;
-  --sidebar-width: 280px;
-  --header-height: 56px;
-  --radius: 6px;
+  --color-item-hover: #f1f3f5;
+  --color-item-active: #ede9fe;
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.12);
 }

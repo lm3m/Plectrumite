@@ -13,6 +13,11 @@ import type { MusicalNotationContent, CombinedTabNotationContent } from '../type
 const STAVE_WIDTH = 400;
 const STAVE_X = 10;
 
+function getStaveColor(): string {
+  const isDark = !document.documentElement.classList.contains('light-mode');
+  return isDark ? '#cccccc' : '#000000';
+}
+
 // Standard guitar tuning (string number -> MIDI note)
 const GUITAR_TUNING = [
   64, // String 1 (high E) = E4
@@ -82,6 +87,11 @@ export function renderNotation(
   const renderer = new Renderer(container, Renderer.Backends.SVG);
   renderer.resize(totalWidth, 160);
   const context = renderer.getContext();
+  
+  // Set color for dark mode
+  const color = getStaveColor();
+  context.setFillStyle(color);
+  context.setStrokeStyle(color);
 
   let x = STAVE_X;
 
@@ -132,6 +142,11 @@ export function renderCombined(
   const renderer = new Renderer(container, Renderer.Backends.SVG);
   renderer.resize(totalWidth, 320);
   const context = renderer.getContext();
+  
+  // Set color for dark mode
+  const color = getStaveColor();
+  context.setFillStyle(color);
+  context.setStrokeStyle(color);
 
   let x = STAVE_X;
 
@@ -175,6 +190,7 @@ export function renderCombined(
         // Case 1: Both notes and tabs provided
         if (hasNotes && hasTab) {
           const noteTokens = measure.notes.split(',').map(s => s.trim()).filter(Boolean);
+          const color = getStaveColor();
           staveNotes = noteTokens.map(token => {
             const { keys, duration } = parseNoteString(token);
             return new StaveNote({ keys: keys.map(k => `${k}`), duration });
@@ -182,15 +198,18 @@ export function renderCombined(
 
           tabNotes = (measure.tabPositions || []).map((positions, idx) => {
             const duration = staveNotes[idx]?.getDuration() || 'q';
-            return new TabNote({
+            const note = new TabNote({
               positions: positions.map(p => ({ str: p.string, fret: p.fret })),
               duration,
             });
+            note.setStyle({ fillStyle: color, strokeStyle: color });
+            return note;
           });
         }
         // Case 2: Only tabs provided - generate notes from tabs
         else if (hasTab) {
           const positions = measure.tabPositions || [];
+          const color = getStaveColor();
           
           // Create notes from tab positions
           staveNotes = positions.map((pos) => {
@@ -200,15 +219,18 @@ export function renderCombined(
 
           // Create tab notes
           tabNotes = positions.map((pos) => {
-            return new TabNote({
+            const note = new TabNote({
               positions: pos.map(p => ({ str: p.string, fret: p.fret })),
               duration: 'q',
             });
+            note.setStyle({ fillStyle: color, strokeStyle: color });
+            return note;
           });
         }
         // Case 3: Only notes provided - generate tabs from notes
         else if (hasNotes) {
           const noteTokens = measure.notes.split(',').map(s => s.trim()).filter(Boolean);
+          const color = getStaveColor();
           
           staveNotes = noteTokens.map(token => {
             const { keys, duration } = parseNoteString(token);
@@ -217,10 +239,12 @@ export function renderCombined(
 
           // Generate placeholder tabs matching each note
           tabNotes = staveNotes.map((note) => {
-            return new TabNote({
+            const tabNote = new TabNote({
               positions: [{ str: 1, fret: 0 }],
               duration: note.getDuration(),
             });
+            tabNote.setStyle({ fillStyle: color, strokeStyle: color });
+            return tabNote;
           });
         }
 

@@ -64,7 +64,7 @@ const componentMap: Record<BlockType, any> = {
   justify-content: space-between;
   padding: 8px 12px;
   border-bottom: 1px solid var(--color-border);
-  background: #f1f3f5;
+  background: var(--color-surface-alt);
   border-radius: var(--radius) var(--radius) 0 0;
 }
 

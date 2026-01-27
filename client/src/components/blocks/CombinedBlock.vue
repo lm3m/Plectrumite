@@ -174,7 +174,7 @@ function handleSave() {
 .combined-editor {
   margin-bottom: 12px;
   padding: 12px;
-  background: #f8f9fa;
+  background: rgba(0, 0, 0, 0.15);
   border-radius: var(--radius);
   border: 1px solid var(--color-border);
 }
@@ -207,6 +207,8 @@ function handleSave() {
   border-radius: 4px;
   padding: 4px 6px;
   font-size: 0.85rem;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 select {
@@ -214,6 +216,8 @@ select {
   border-radius: 4px;
   padding: 4px 6px;
   font-size: 0.85rem;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .measures-input {
@@ -225,6 +229,8 @@ select {
   padding: 8px;
   resize: vertical;
   margin-top: 4px;
+  background: var(--color-surface);
+  color: var(--color-text);
 }
 
 .combined-render {
@@ -232,7 +238,7 @@ select {
 }
 
 code {
-  background: #e9ecef;
+  background: rgba(255, 255, 255, 0.1);
   padding: 1px 4px;
   border-radius: 3px;
   font-size: 0.8em;

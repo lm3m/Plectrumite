@@ -107,12 +107,12 @@ function formatDate(dateStr: string): string {
 }
 
 .doc-item:hover {
-  background: #f1f3f5;
+  background: var(--color-item-hover);
   text-decoration: none;
 }
 
 .doc-item.active {
-  background: #e7f0fd;
+  background: var(--color-item-active);
   border-left: 3px solid var(--color-primary);
 }
 

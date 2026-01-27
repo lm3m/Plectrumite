@@ -29,3 +29,12 @@ button {
   cursor: pointer;
   font-family: inherit;
 }
+
+/* VexFlow tab note backgrounds for dark mode */
+svg text {
+  paint-order: stroke fill;
+  stroke: var(--color-surface);
+  stroke-width: 12px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
