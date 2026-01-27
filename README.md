@@ -25,6 +25,8 @@ A guitar practice schedule builder. Create documents with blocks of guitar tabs,
 | Markdown | marked + DOMPurify                  |
 | Backend  | Express.js, TypeScript              |
 | Database | SQLite via better-sqlite3           |
+| Linting  | ESLint 9 + typescript-eslint + eslint-plugin-vue |
+| Deploy   | Docker (multi-stage build)          |
 
 ## Getting Started
 
@@ -57,12 +59,39 @@ npm run build
 
 Compiles the server TypeScript to `server/dist/` and builds the Vue client to `client/dist/`.
 
+### Lint
+
+```bash
+npm run lint          # Check for issues
+npm run lint:fix      # Auto-fix what's possible
+```
+
+Runs ESLint across both client (Vue + TypeScript) and server (TypeScript).
+
+### Docker
+
+Build and run in production with Docker:
+
+```bash
+docker compose up -d
+```
+
+The app is available at [http://localhost:3000](http://localhost:3000). In production, Express serves the built Vue client as static files alongside the API. SQLite data is persisted via a Docker volume.
+
+To rebuild after code changes:
+
+```bash
+docker compose up -d --build
+```
+
 ## Project Structure
 
 ```
 Plectrumite/
-├── package.json                 # Root scripts (dev, build, install:all)
+├── package.json                 # Root scripts (dev, build, lint, install:all)
 ├── tsconfig.base.json           # Shared TypeScript config
+├── Dockerfile                   # Multi-stage production build
+├── docker-compose.yml           # Production orchestration
 ├── server/
 │   ├── package.json
 │   ├── tsconfig.json
@@ -83,6 +112,7 @@ Plectrumite/
 └── client/
     ├── package.json
     ├── vite.config.ts           # Vue plugin + API proxy
+    ├── eslint.config.js         # ESLint flat config (Vue + TS)
     ├── index.html
     └── src/
         ├── main.ts
