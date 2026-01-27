@@ -1,17 +1,18 @@
 # Plectrumite
 
-A guitar practice schedule builder. Create documents with blocks of guitar tabs, fretboard diagrams, musical notation, and freeform text to organize your practice sessions.
+A guitar practice schedule builder. Create documents with blocks of guitar tabs, fretboard diagrams, musical notation, images, and freeform text to organize your practice sessions.
 
 ## Features
 
 - **Document management** — Create, edit, and delete practice schedule documents
 - **Block-based editor** — Each document contains an ordered list of content blocks that can be rearranged
-- **Five block types:**
+- **Six block types:**
   - **Guitar Tab** — Monospace tablature editor with a standard 6-string template
   - **Fretboard View** — Interactive SVG fretboard (12 or 24 frets) where you click to place/remove note markers
   - **Musical Notation** — Standard notation rendered via VexFlow, with editable measures, clef, time signature, and key
   - **Combined Tab + Notation** — Stacked standard notation and tablature rendered together via VexFlow
   - **Markdown Text** — Freeform rich text with a live preview powered by `marked`
+  - **Image** — Upload and display images (sheet music photos, chord diagrams, etc.) with optional captions; supports drag-and-drop
 - **Auto-save** — Changes are persisted automatically after a short debounce
 - **Single-user, no auth** — Designed as a local tool; no login required
 
@@ -23,6 +24,7 @@ A guitar practice schedule builder. Create documents with blocks of guitar tabs,
 | State    | Pinia                               |
 | Notation | VexFlow 4                           |
 | Markdown | marked + DOMPurify                  |
+| Uploads  | multer                              |
 | Backend  | Express.js, TypeScript              |
 | Database | SQLite via better-sqlite3           |
 | Linting  | ESLint 9 + typescript-eslint + eslint-plugin-vue |
@@ -101,10 +103,12 @@ Plectrumite/
 │       │   ├── connection.ts    # SQLite singleton (WAL mode)
 │       │   ├── migrate.ts       # Migration runner
 │       │   └── migrations/
-│       │       └── 001_initial.ts
+│       │       ├── 001_initial.ts
+│       │       └── 002_add_image_block_type.ts
 │       ├── routes/
 │       │   ├── documents.ts     # Document CRUD
-│       │   └── blocks.ts        # Block CRUD + reorder
+│       │   ├── blocks.ts        # Block CRUD + reorder
+│       │   └── uploads.ts       # Image upload (multer)
 │       ├── types/
 │       │   └── index.ts
 │       └── middleware/
@@ -131,7 +135,7 @@ Plectrumite/
         ├── components/
         │   ├── layout/          # AppHeader, AppSidebar
         │   ├── document/        # DocumentHeader, BlockList, BlockWrapper, BlockToolbar
-        │   ├── blocks/          # TabBlock, FretboardBlock, NotationBlock, CombinedBlock, MarkdownBlock
+        │   ├── blocks/          # TabBlock, FretboardBlock, NotationBlock, CombinedBlock, MarkdownBlock, ImageBlock
         │   └── fretboard/       # FretboardSvg, FretboardControls
         └── styles/              # CSS variables, global styles, block styles
 ```
@@ -149,6 +153,7 @@ Plectrumite/
 | PUT | `/api/blocks/:id` | Update a block's content |
 | DELETE | `/api/blocks/:id` | Delete a block |
 | PUT | `/api/documents/:id/blocks/reorder` | Reorder blocks within a document |
+| POST | `/api/uploads` | Upload an image (multipart form data) |
 
 ## Block Content Formats
 
@@ -185,6 +190,10 @@ Where `string:fret` maps each note to a tab position.
 
 Standard markdown rendered with live preview. Supports headings, lists, code blocks, bold, italic, and links.
 
+### Image
+
+Upload images via file picker or drag-and-drop. Accepted formats: JPEG, PNG, GIF, WebP, SVG (max 10 MB). Images are stored on the server at `server/data/uploads/` and served at `/uploads/<filename>`. An optional caption can be added below the image.
+
 ## Data Storage
 
-All data is stored in a SQLite database at `server/data/plectrumite.db` (created automatically on first run). This path is gitignored. Block content is stored as JSON text in the `blocks` table.
+All data is stored in a SQLite database at `server/data/plectrumite.db` (created automatically on first run). This path is gitignored. Block content is stored as JSON text in the `blocks` table. Uploaded images are stored on the filesystem at `server/data/uploads/` (also covered by the Docker volume).

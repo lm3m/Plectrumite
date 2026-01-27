@@ -7,6 +7,7 @@ import FretboardBlock from '../blocks/FretboardBlock.vue';
 import NotationBlock from '../blocks/NotationBlock.vue';
 import CombinedBlock from '../blocks/CombinedBlock.vue';
 import MarkdownBlock from '../blocks/MarkdownBlock.vue';
+import ImageBlock from '../blocks/ImageBlock.vue';
 
 defineProps<{
   block: Block;
@@ -27,6 +28,7 @@ const componentMap: Record<BlockType, Component> = {
   [BlockType.MusicalNotation]: NotationBlock,
   [BlockType.CombinedTabNotation]: CombinedBlock,
   [BlockType.MarkdownText]: MarkdownBlock,
+  [BlockType.Image]: ImageBlock,
 };
 </script>
 

@@ -1,12 +1,13 @@
 import { getDb } from './connection.js';
 import * as migration001 from './migrations/001_initial.js';
+import * as migration002 from './migrations/002_add_image_block_type.js';
 
 interface Migration {
   name: string;
   up: (db: import('better-sqlite3').Database) => void;
 }
 
-const migrations: Migration[] = [migration001];
+const migrations: Migration[] = [migration001, migration002];
 
 export function runMigrations(): void {
   const db = getDb();

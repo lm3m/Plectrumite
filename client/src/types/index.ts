@@ -4,6 +4,7 @@ export enum BlockType {
   MusicalNotation = 'musical_notation',
   CombinedTabNotation = 'combined_tab_notation',
   MarkdownText = 'markdown_text',
+  Image = 'image',
 }
 
 // --- Block content types ---
@@ -55,12 +56,18 @@ export interface MarkdownTextContent {
   markdown: string;
 }
 
+export interface ImageContent {
+  url: string;
+  caption?: string;
+}
+
 export type BlockContent =
   | GuitarTabContent
   | FretboardViewContent
   | MusicalNotationContent
   | CombinedTabNotationContent
-  | MarkdownTextContent;
+  | MarkdownTextContent
+  | ImageContent;
 
 // --- Document & Block ---
 
@@ -120,6 +127,7 @@ export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
   [BlockType.MusicalNotation]: 'Notation',
   [BlockType.CombinedTabNotation]: 'Tab + Notation',
   [BlockType.MarkdownText]: 'Text',
+  [BlockType.Image]: 'Image',
 };
 
 export function defaultContentForType(type: BlockType): BlockContent {
@@ -154,5 +162,7 @@ export function defaultContentForType(type: BlockType): BlockContent {
       };
     case BlockType.MarkdownText:
       return { markdown: '' };
+    case BlockType.Image:
+      return { url: '', caption: '' };
   }
 }

@@ -4,6 +4,7 @@ export enum BlockType {
   MusicalNotation = 'musical_notation',
   CombinedTabNotation = 'combined_tab_notation',
   MarkdownText = 'markdown_text',
+  Image = 'image',
 }
 
 export interface Document {
