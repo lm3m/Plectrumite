@@ -29,7 +29,7 @@ function applyTheme() {
   <header class="app-header">
     <router-link to="/" class="app-title">Plectrumite</router-link>
     <span class="app-subtitle">Guitar Practice Schedules</span>
-    <button @click="toggleTheme" class="theme-toggle" :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'">
+    <button class="theme-toggle" :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'" @click="toggleTheme">
       <span v-if="isDarkMode">◐</span>
       <span v-else>◑</span>
     </button>

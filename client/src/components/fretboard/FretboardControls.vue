@@ -16,17 +16,23 @@ const emit = defineEmits<{
       <button
         :class="{ active: fretCount === 12 }"
         @click="emit('set-fret-count', 12)"
-      >12 Frets</button>
+      >
+        12 Frets
+      </button>
       <button
         :class="{ active: fretCount === 24 }"
         @click="emit('set-fret-count', 24)"
-      >24 Frets</button>
+      >
+        24 Frets
+      </button>
     </div>
     <button
       v-if="markerCount > 0"
       class="btn-clear"
       @click="emit('clear')"
-    >Clear All ({{ markerCount }})</button>
+    >
+      Clear All ({{ markerCount }})
+    </button>
   </div>
 </template>
 

@@ -3,7 +3,6 @@ import { defineStore } from 'pinia';
 import type {
   Document,
   DocumentWithBlocks,
-  Block,
   CreateDocumentRequest,
   UpdateDocumentRequest,
   CreateBlockRequest,
@@ -29,8 +28,8 @@ export const useDocumentsStore = defineStore('documents', () => {
     error.value = null;
     try {
       documents.value = await docApi.fetchDocuments();
-    } catch (e: any) {
-      error.value = e.message;
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : String(e);
     } finally {
       loading.value = false;
     }
@@ -41,8 +40,8 @@ export const useDocumentsStore = defineStore('documents', () => {
     error.value = null;
     try {
       currentDocument.value = await docApi.fetchDocument(id);
-    } catch (e: any) {
-      error.value = e.message;
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : String(e);
     } finally {
       loading.value = false;
     }
@@ -54,8 +53,8 @@ export const useDocumentsStore = defineStore('documents', () => {
       const doc = await docApi.createDocument(data);
       documents.value.unshift(doc);
       return doc;
-    } catch (e: any) {
-      error.value = e.message;
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : String(e);
       return null;
     }
   }
@@ -69,8 +68,8 @@ export const useDocumentsStore = defineStore('documents', () => {
       if (currentDocument.value?.id === id) {
         currentDocument.value = { ...currentDocument.value, ...doc };
       }
-    } catch (e: any) {
-      error.value = e.message;
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : String(e);
     }
   }
 
@@ -82,8 +81,8 @@ export const useDocumentsStore = defineStore('documents', () => {
       if (currentDocument.value?.id === id) {
         currentDocument.value = null;
       }
-    } catch (e: any) {
-      error.value = e.message;
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : String(e);
     }
   }
 
@@ -95,8 +94,8 @@ export const useDocumentsStore = defineStore('documents', () => {
         currentDocument.value.blocks.push(block);
       }
       return block;
-    } catch (e: any) {
-      error.value = e.message;
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : String(e);
       return null;
     }
   }
@@ -111,8 +110,8 @@ export const useDocumentsStore = defineStore('documents', () => {
           currentDocument.value.blocks[idx] = updated;
         }
       }
-    } catch (e: any) {
-      error.value = e.message;
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : String(e);
     }
   }
 
@@ -125,8 +124,8 @@ export const useDocumentsStore = defineStore('documents', () => {
           b => b.id !== blockId
         );
       }
-    } catch (e: any) {
-      error.value = e.message;
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : String(e);
     }
   }
 
@@ -137,8 +136,8 @@ export const useDocumentsStore = defineStore('documents', () => {
       if (currentDocument.value?.id === documentId) {
         currentDocument.value.blocks = blocks;
       }
-    } catch (e: any) {
-      error.value = e.message;
+    } catch (e: unknown) {
+      error.value = e instanceof Error ? e.message : String(e);
     }
   }
 

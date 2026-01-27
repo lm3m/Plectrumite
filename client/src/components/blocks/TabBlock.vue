@@ -39,9 +39,9 @@ function handleInput() {
       v-if="editing"
       v-model="text"
       class="tab-editor"
-      @input="handleInput"
       rows="8"
       spellcheck="false"
+      @input="handleInput"
     ></textarea>
     <pre v-else class="tab-view">{{ text }}</pre>
   </div>

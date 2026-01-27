@@ -3,7 +3,7 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useDocumentsStore } from '../../stores/documents';
 
-const props = defineProps<{ currentId?: number }>();
+defineProps<{ currentId?: number }>();
 
 const store = useDocumentsStore();
 const router = useRouter();

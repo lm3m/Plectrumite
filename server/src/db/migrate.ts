@@ -19,7 +19,7 @@ export function runMigrations(): void {
   `);
 
   const applied = new Set(
-    db.prepare('SELECT name FROM _migrations').all().map((row: any) => row.name)
+    db.prepare('SELECT name FROM _migrations').all().map((row: { name: string }) => row.name)
   );
 
   const insert = db.prepare('INSERT INTO _migrations (name) VALUES (?)');

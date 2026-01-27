@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { Component } from 'vue';
 import { BlockType, BLOCK_TYPE_LABELS } from '../../types';
 import type { Block, BlockContent } from '../../types';
 import TabBlock from '../blocks/TabBlock.vue';
@@ -7,7 +8,7 @@ import NotationBlock from '../blocks/NotationBlock.vue';
 import CombinedBlock from '../blocks/CombinedBlock.vue';
 import MarkdownBlock from '../blocks/MarkdownBlock.vue';
 
-const props = defineProps<{
+defineProps<{
   block: Block;
   isFirst: boolean;
   isLast: boolean;
@@ -20,7 +21,7 @@ const emit = defineEmits<{
   (e: 'move-down'): void;
 }>();
 
-const componentMap: Record<BlockType, any> = {
+const componentMap: Record<BlockType, Component> = {
   [BlockType.GuitarTab]: TabBlock,
   [BlockType.FretboardView]: FretboardBlock,
   [BlockType.MusicalNotation]: NotationBlock,
@@ -34,9 +35,9 @@ const componentMap: Record<BlockType, any> = {
     <div class="block-header">
       <span class="block-type-label">{{ BLOCK_TYPE_LABELS[block.block_type] }}</span>
       <div class="block-actions">
-        <button :disabled="isFirst" @click="emit('move-up')" title="Move up">&#9650;</button>
-        <button :disabled="isLast" @click="emit('move-down')" title="Move down">&#9660;</button>
-        <button class="danger" @click="emit('delete')" title="Delete block">&#10005;</button>
+        <button :disabled="isFirst" title="Move up" @click="emit('move-up')">&#9650;</button>
+        <button :disabled="isLast" title="Move down" @click="emit('move-down')">&#9660;</button>
+        <button class="danger" title="Delete block" @click="emit('delete')">&#10005;</button>
       </div>
     </div>
     <div class="block-content">

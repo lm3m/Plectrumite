@@ -43,14 +43,16 @@ function handleInput() {
       v-model="markdown"
       class="md-editor"
       placeholder="Write markdown here..."
-      @input="handleInput"
       rows="6"
+      @input="handleInput"
     ></textarea>
+    <!-- eslint-disable vue/no-v-html -- sanitized via DOMPurify -->
     <div
       v-else
       class="md-preview"
       v-html="rendered"
     ></div>
+    <!-- eslint-enable vue/no-v-html -->
   </div>
 </template>
 
@@ -108,13 +110,13 @@ function handleInput() {
 .md-preview :deep(p) { margin: 6px 0; }
 .md-preview :deep(ul), .md-preview :deep(ol) { padding-left: 20px; margin: 6px 0; }
 .md-preview :deep(code) {
-  background: #f1f3f5;
+  background: var(--color-surface-alt);
   padding: 2px 6px;
   border-radius: 3px;
   font-size: 0.85em;
 }
 .md-preview :deep(pre) {
-  background: #f1f3f5;
+  background: var(--color-surface-alt);
   padding: 12px;
   border-radius: var(--radius);
   overflow-x: auto;

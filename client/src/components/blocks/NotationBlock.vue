@@ -88,11 +88,11 @@ function handleSave() {
         </label>
         <label>
           Time:
-          <input v-model="timeSignature" @input="handleSave" placeholder="4/4" class="small-input" />
+          <input v-model="timeSignature" placeholder="4/4" class="small-input" @input="handleSave" />
         </label>
         <label>
           Key:
-          <input v-model="keySignature" @input="handleSave" placeholder="C" class="small-input" />
+          <input v-model="keySignature" placeholder="C" class="small-input" @input="handleSave" />
         </label>
       </div>
       <div class="editor-row">
@@ -100,11 +100,11 @@ function handleSave() {
           Measures (one per line, VexFlow format: e.g. <code>C4/q, D4/q, E4/h</code>):
           <textarea
             v-model="measuresText"
-            @input="handleSave"
             rows="4"
             class="measures-input"
             spellcheck="false"
             placeholder="C4/q, D4/q, E4/q, F4/q"
+            @input="handleSave"
           ></textarea>
         </label>
       </div>

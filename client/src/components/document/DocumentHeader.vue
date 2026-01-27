@@ -40,12 +40,12 @@ function saveDesc() {
     <div class="title-row">
       <input
         v-if="editingTitle"
+        ref="titleRef"
         v-model="titleInput"
         class="title-input"
+        autofocus
         @blur="saveTitle"
         @keydown.enter="saveTitle"
-        ref="titleRef"
-        autofocus
       />
       <h1 v-else class="title" @click="editingTitle = true">{{ title }}</h1>
       <button class="btn-delete" @click="$emit('delete')">Delete</button>
@@ -56,9 +56,9 @@ function saveDesc() {
         v-model="descInput"
         class="desc-input"
         placeholder="Add a description..."
+        autofocus
         @blur="saveDesc"
         @keydown.enter="saveDesc"
-        autofocus
       />
       <p
         v-else

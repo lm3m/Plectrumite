@@ -31,8 +31,7 @@ function serializeMeasures(measures: CombinedMeasure[]): string {
 }
 
 function parseMeasures(text: string): CombinedMeasure[] {
-  console.log('parseMeasures input:', text);
-  const measures = text.split('\n').filter(l => l.trim()).map(line => {
+  return text.split('\n').filter(l => l.trim()).map(line => {
     const [notesStr, tabStr] = line.split('|').map(s => s.trim());
     const tabPositions = tabStr
       ? tabStr.split(',').map(group =>
@@ -44,8 +43,6 @@ function parseMeasures(text: string): CombinedMeasure[] {
       : [];
     return { notes: notesStr || '', tabPositions };
   });
-  console.log('parseMeasures output:', measures);
-  return measures;
 }
 
 const measuresText = ref(serializeMeasures(props.content.measures || []));
@@ -70,7 +67,6 @@ const localContent = computed<CombinedTabNotationContent>(() => ({
 
 function doRender() {
   if (!containerRef.value) return;
-  console.log('doRender called with:', localContent.value);
   try {
     renderCombined(containerRef.value, localContent.value);
   } catch (error) {
@@ -120,25 +116,25 @@ function handleSave() {
         </label>
         <label>
           Time:
-          <input v-model="timeSignature" @input="handleSave" placeholder="4/4" class="small-input" />
+          <input v-model="timeSignature" placeholder="4/4" class="small-input" @input="handleSave" />
         </label>
         <label>
           Key:
-          <input v-model="keySignature" @input="handleSave" placeholder="C" class="small-input" />
+          <input v-model="keySignature" placeholder="C" class="small-input" @input="handleSave" />
         </label>
       </div>
       <div class="editor-row">
         <label class="full-width">
-          Measures (one per line): <code>notes | tab positions</code><br/>
-          Notes: <code>C4/q, D4/q, E4/h</code><br/>
+          Measures (one per line): <code>notes | tab positions</code><br />
+          Notes: <code>C4/q, D4/q, E4/h</code><br />
           Tab positions (per note, comma-separated): <code>2:1, 3:2, 4:2, 4:3</code> where <code>string:fret</code>
           <textarea
             v-model="measuresText"
-            @input="handleSave"
             rows="5"
             class="measures-input"
             spellcheck="false"
             placeholder="C4/q, D4/q, E4/q, F4/q | 2:1, 3:2, 4:2, 4:3"
+            @input="handleSave"
           ></textarea>
         </label>
       </div>
