@@ -7,8 +7,9 @@ import {
   TabStave,
   TabNote,
   StaveConnector,
+  Barline,
 } from 'vexflow';
-import type { MusicalNotationContent, CombinedTabNotationContent } from '../types';
+import type { MusicalNotationContent, CombinedTabNotationContent, CombinedMeasure } from '../types';
 
 const STAVE_WIDTH = 400;
 const STAVE_X = 10;
@@ -103,6 +104,7 @@ export function renderNotation(
       stave.addClef(data.clef || 'treble');
       stave.addTimeSignature(data.timeSignature || '4/4');
       stave.addKeySignature(data.keySignature || 'C');
+      stave.setBegBarType(Barline.type.REPEAT_BEGIN);
     }
 
     stave.setContext(context).draw();
@@ -132,17 +134,21 @@ export function renderNotation(
 
 export function renderCombined(
   container: HTMLDivElement,
-  data: CombinedTabNotationContent
+  data: CombinedTabNotationContent,
+  staveWidth = STAVE_WIDTH,
+  notationY = 20,
+  tabY = 160,
+  totalHeight = 320
 ): void {
   container.innerHTML = '';
 
   if (!data.measures || data.measures.length === 0) return;
 
-  const totalWidth = STAVE_X + data.measures.length * STAVE_WIDTH + 20;
+  const totalWidth = STAVE_X + data.measures.length * staveWidth + 20;
   const renderer = new Renderer(container, Renderer.Backends.SVG);
-  renderer.resize(totalWidth, 320);
+  renderer.resize(totalWidth, totalHeight);
   const context = renderer.getContext();
-  
+
   // Set color for dark mode
   const color = getStaveColor();
   context.setFillStyle(color);
@@ -154,19 +160,21 @@ export function renderCombined(
     const measure = data.measures[i];
 
     // Notation stave
-    const notationStave = new Stave(x, 20, STAVE_WIDTH);
+    const notationStave = new Stave(x, notationY, staveWidth);
     if (i === 0) {
       notationStave.addClef(data.clef || 'treble');
       notationStave.addTimeSignature(data.timeSignature || '4/4');
       notationStave.addKeySignature(data.keySignature || 'C');
+      notationStave.setBegBarType(Barline.type.REPEAT_BEGIN);
     }
     notationStave.setContext(context).draw();
 
     // Tab stave
-    const tabStave = new TabStave(x, 160, STAVE_WIDTH);
+    const tabStave = new TabStave(x, tabY, staveWidth);
     if (i === 0) {
       tabStave.addClef('tab');
       tabStave.addTimeSignature(data.timeSignature || '4/4');
+      tabStave.setBegBarType(Barline.type.REPEAT_BEGIN);
     }
     tabStave.setContext(context).draw();
 
@@ -261,7 +269,7 @@ export function renderCombined(
           const formatter = new Formatter();
           formatter.joinVoices([notationVoice]);
           formatter.joinVoices([tabVoice]);
-          formatter.format([notationVoice, tabVoice], STAVE_WIDTH - 50);
+          formatter.format([notationVoice, tabVoice], staveWidth - 50);
 
           notationVoice.draw(context, notationStave);
           tabVoice.draw(context, tabStave);
@@ -271,6 +279,62 @@ export function renderCombined(
       }
     }
 
-    x += STAVE_WIDTH;
+    x += staveWidth;
+  }
+}
+
+export function renderTab(
+  container: HTMLDivElement,
+  measures: CombinedMeasure[],
+  timeSignature = '4/4',
+  staveWidth = STAVE_WIDTH,
+  staveY = 20,
+  totalHeight = 120
+): void {
+  container.innerHTML = '';
+  if (!measures.length) return;
+
+  const totalWidth = STAVE_X + measures.length * staveWidth + 20;
+  const renderer = new Renderer(container, Renderer.Backends.SVG);
+  renderer.resize(totalWidth, totalHeight);
+  const context = renderer.getContext();
+
+  const color = getStaveColor();
+  context.setFillStyle(color);
+  context.setStrokeStyle(color);
+
+  const { numBeats, beatValue } = parseTimeSignature(timeSignature);
+  let x = STAVE_X;
+
+  for (let i = 0; i < measures.length; i++) {
+    const tabStave = new TabStave(x, staveY, staveWidth);
+    if (i === 0) {
+      tabStave.addClef('tab');
+      tabStave.addTimeSignature(timeSignature);
+    }
+    tabStave.setContext(context).draw();
+
+    const positions = measures[i].tabPositions;
+    if (positions && positions.length > 0) {
+      try {
+        const tabNotes = positions.map(beat => {
+          const note = new TabNote({
+            positions: beat.map(p => ({ str: p.string, fret: p.fret })),
+            duration: 'q',
+          });
+          note.setStyle({ fillStyle: color, strokeStyle: color });
+          return note;
+        });
+
+        const voice = new Voice({ num_beats: numBeats, beat_value: beatValue }).setStrict(false);
+        voice.addTickables(tabNotes);
+        new Formatter().joinVoices([voice]).format([voice], staveWidth - 40);
+        voice.draw(context, tabStave);
+      } catch (e) {
+        console.warn('VexFlow tab render error:', e);
+      }
+    }
+
+    x += staveWidth;
   }
 }

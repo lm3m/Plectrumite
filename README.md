@@ -13,6 +13,9 @@ A guitar practice schedule builder. Create documents with blocks of guitar tabs,
   - **Combined Tab + Notation** — Stacked standard notation and tablature rendered together via VexFlow
   - **Markdown Text** — Freeform rich text with a live preview powered by `marked`
   - **Image** — Upload and display images (sheet music photos, chord diagrams, etc.) with optional captions; supports drag-and-drop
+- **Practice tools** — Accessible via the header menu:
+  - **Metronome** — Visual + audio, 4/4 time, 20–300 BPM, tempo persisted across sessions
+  - **Chord Practice** — Displays two chord diagrams with randomise and manual selection; supports open cowboy chords (A, Am, C, D, Dm, E, Em, F, G) and barre chords (E-shape or A-shape, any root note); configurable beats per chord (1–4)
 - **Auto-save** — Changes are persisted automatically after a short debounce
 - **Single-user, no auth** — Designed as a local tool; no login required
 
