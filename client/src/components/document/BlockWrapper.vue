@@ -58,9 +58,11 @@ const timerState = ref<TimerState>('idle');
 const timeLeft = ref(0);  // seconds
 let intervalId: ReturnType<typeof setInterval> | null = null;
 
-const targetSeconds = computed(() =>
-  ((props.block.content as { practiceMinutes?: number }).practiceMinutes ?? 0) * 60
+const practiceMinutes = computed(() =>
+  (props.block.content as { practiceMinutes?: number }).practiceMinutes
 );
+
+const targetSeconds = computed(() => (practiceMinutes.value ?? 0) * 60);
 
 const displayTime = computed(() => {
   const secs = timerState.value === 'idle' ? targetSeconds.value : timeLeft.value;
@@ -146,7 +148,7 @@ onUnmounted(() => { clearTimer(); });
       <input
         type="number"
         class="timer-input"
-        :value="(block.content as { practiceMinutes?: number }).practiceMinutes ?? ''"
+        :value="practiceMinutes ?? ''"
         min="1"
         max="99"
         placeholder="min"
