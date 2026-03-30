@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue';
 import type { FretboardViewContent } from '../../types';
-import { toggleMarker } from '../../composables/useFretboard';
+import { toggleMarker, computeScaleOverlay } from '../../composables/useFretboard';
 import FretboardSvg from '../fretboard/FretboardSvg.vue';
 import FretboardControls from '../fretboard/FretboardControls.vue';
 
@@ -11,6 +12,16 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update', content: FretboardViewContent): void;
 }>();
+
+const scaleRoot = ref('A');
+const scaleKey = ref('');
+const scaleLabelMode = ref<'note' | 'degree'>('note');
+
+const scaleOverlay = computed(() =>
+  scaleKey.value
+    ? computeScaleOverlay(scaleRoot.value, scaleKey.value, props.content.fretCount, props.content.tuning)
+    : []
+);
 
 function handleToggleMarker(string: number, fret: number) {
   const markers = toggleMarker(props.content.markers, string, fret);
@@ -26,6 +37,15 @@ function handleSetFretCount(count: 12 | 24) {
 function handleClear() {
   emit('update', { ...props.content, markers: [] });
 }
+
+function handleSetScale(root: string, key: string) {
+  scaleRoot.value = root;
+  scaleKey.value = key;
+}
+
+function handleSetScaleLabelMode(mode: 'note' | 'degree') {
+  scaleLabelMode.value = mode;
+}
 </script>
 
 <template>
@@ -33,14 +53,21 @@ function handleClear() {
     <FretboardControls
       :fret-count="content.fretCount"
       :marker-count="content.markers.length"
+      :scale-root="scaleRoot"
+      :scale-key="scaleKey"
+      :scale-label-mode="scaleLabelMode"
       @set-fret-count="handleSetFretCount"
       @clear="handleClear"
+      @set-scale="handleSetScale"
+      @set-scale-label-mode="handleSetScaleLabelMode"
     />
     <div class="fretboard-scroll">
       <FretboardSvg
         :fret-count="content.fretCount"
         :markers="content.markers"
         :tuning="content.tuning"
+        :scale-overlay="scaleOverlay"
+        :scale-label-mode="scaleLabelMode"
         @toggle-marker="handleToggleMarker"
       />
     </div>

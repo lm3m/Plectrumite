@@ -2,10 +2,12 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import MetronomeWidget from '@/components/tools/MetronomeWidget.vue';
 import ChordPracticeWidget from '@/components/tools/ChordPracticeWidget.vue';
+import PracticeLogModal from '@/components/tools/PracticeLogModal.vue';
 
 const isDarkMode = ref(true);
 const menuOpen = ref(false);
 const practiceToolsOpen = ref(false);
+const practiceLogOpen = ref(false);
 const menuRef = ref<HTMLElement | null>(null);
 const beatsPerChord = ref(1);
 
@@ -62,9 +64,28 @@ function handleOutsideClick(e: MouseEvent) {
           <span class="item-icon">♩</span>
           Practice tools
         </button>
+        <button class="dropdown-item" @click="practiceLogOpen = true; menuOpen = false">
+          <span class="item-icon">📋</span>
+          Practice log
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Practice Log Modal -->
+  <Teleport to="body">
+    <div v-if="practiceLogOpen" class="modal-backdrop" @click.self="practiceLogOpen = false">
+      <div class="modal" role="dialog" aria-modal="true" aria-label="Practice log">
+        <div class="modal-header">
+          <h2>Practice Log</h2>
+          <button class="modal-close" aria-label="Close" @click="practiceLogOpen = false">✕</button>
+        </div>
+        <div class="modal-body">
+          <PracticeLogModal @close="practiceLogOpen = false" />
+        </div>
+      </div>
+    </div>
+  </Teleport>
 
   <!-- Practice Tools Modal -->
   <Teleport to="body">

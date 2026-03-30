@@ -49,6 +49,7 @@ async function handleDelete() {
         <BlockList
           :blocks="store.currentDocument.blocks"
           :document-id="store.currentDocument.id"
+          :document-title="store.currentDocument.title"
         />
       </div>
       <div v-else class="error">Document not found</div>
@@ -64,7 +65,7 @@ async function handleDelete() {
 
 .doc-main {
   flex: 1;
-  padding: 28px 36px;
+  padding: 24px 20px;
   overflow-y: auto;
   height: calc(100vh - var(--header-height));
 }

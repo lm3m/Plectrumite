@@ -8,14 +8,16 @@ A guitar practice schedule builder. Create documents with blocks of guitar tabs,
 - **Block-based editor** — Each document contains an ordered list of content blocks that can be rearranged
 - **Six block types:**
   - **Guitar Tab** — Monospace tablature editor with a standard 6-string template
-  - **Fretboard View** — Interactive SVG fretboard (12 or 24 frets) where you click to place/remove note markers
+  - **Fretboard View** — Interactive SVG fretboard (12 or 24 frets) where you click to place/remove note markers; scale overlay displays all positions of a chosen scale (root + type) across the board
   - **Musical Notation** — Standard notation rendered via VexFlow, with editable measures, clef, time signature, and key
   - **Combined Tab + Notation** — Stacked standard notation and tablature rendered together via VexFlow
   - **Markdown Text** — Freeform rich text with a live preview powered by `marked`
   - **Image** — Upload and display images (sheet music photos, chord diagrams, etc.) with optional captions; supports drag-and-drop
 - **Practice tools** — Accessible via the header menu:
-  - **Metronome** — Visual + audio, 4/4 time, 20–300 BPM, tempo persisted across sessions
-  - **Chord Practice** — Displays two chord diagrams with randomise and manual selection; supports open cowboy chords (A, Am, C, D, Dm, E, Em, F, G) and barre chords (E-shape or A-shape, any root note); configurable beats per chord (1–4)
+  - **Metronome** — Visual + audio, 20–300 BPM; variable time signatures (2/4, 3/4, 4/4, 5/4, 6/8, 7/8); tempo and time signature persisted across sessions
+  - **Chord Practice** — Three modes: open cowboy chords (A, Am, C, D, Dm, E, Em, F, G), barre chords (E-shape or A-shape, any root note), and chord progressions (7 presets: I–IV–V, I–V–vi–IV, I–vi–IV–V, ii–V–I, i–VII–VI–VII, 12-bar blues, with selectable key); configurable beats per chord (1–4)
+- **Practice timers** — Each block has an optional target duration (minutes); a countdown timer in the block footer can be started, paused, and reset independently per block; timer completion auto-logs the session
+- **Practice log** — Every block has a "✓ Complete" button that logs the session; timer completion logs automatically; log is grouped by date and accessible from the header menu; persisted to localStorage
 - **Auto-save** — Changes are persisted automatically after a short debounce
 - **Single-user, no auth** — Designed as a local tool; no login required
 
@@ -130,7 +132,8 @@ Plectrumite/
         ├── types/index.ts       # Block content types + helpers
         ├── composables/
         │   ├── useVexFlow.ts    # VexFlow rendering logic
-        │   ├── useFretboard.ts  # SVG fretboard geometry + interaction
+        │   ├── useFretboard.ts  # SVG fretboard geometry, interaction, scale overlay
+        │   ├── usePracticeLog.ts # localStorage-backed practice session log
         │   └── useAutoSave.ts   # Debounced auto-save
         ├── views/
         │   ├── HomeView.vue
@@ -139,7 +142,8 @@ Plectrumite/
         │   ├── layout/          # AppHeader, AppSidebar
         │   ├── document/        # DocumentHeader, BlockList, BlockWrapper, BlockToolbar
         │   ├── blocks/          # TabBlock, FretboardBlock, NotationBlock, CombinedBlock, MarkdownBlock, ImageBlock
-        │   └── fretboard/       # FretboardSvg, FretboardControls
+        │   ├── fretboard/       # FretboardSvg, FretboardControls
+        │   └── tools/           # MetronomeWidget, ChordPracticeWidget, ChordDiagram, PracticeLogModal
         └── styles/              # CSS variables, global styles, block styles
 ```
 

@@ -12,6 +12,7 @@ export enum BlockType {
 export interface GuitarTabContent {
   text: string;
   tempo?: number;
+  practiceMinutes?: number;
 }
 
 export interface FretMarker {
@@ -27,6 +28,7 @@ export interface FretboardViewContent {
   markers: FretMarker[];
   tuning?: string[];
   label?: string;
+  practiceMinutes?: number;
 }
 
 export interface NotationMeasure {
@@ -38,6 +40,7 @@ export interface MusicalNotationContent {
   clef: 'treble' | 'bass';
   timeSignature: string;
   keySignature: string;
+  practiceMinutes?: number;
 }
 
 export interface CombinedMeasure {
@@ -50,15 +53,18 @@ export interface CombinedTabNotationContent {
   clef: 'treble' | 'bass';
   timeSignature: string;
   keySignature: string;
+  practiceMinutes?: number;
 }
 
 export interface MarkdownTextContent {
   markdown: string;
+  practiceMinutes?: number;
 }
 
 export interface ImageContent {
   url: string;
   caption?: string;
+  practiceMinutes?: number;
 }
 
 export type BlockContent =

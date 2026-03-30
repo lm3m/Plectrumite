@@ -8,6 +8,7 @@ import BlockToolbar from './BlockToolbar.vue';
 const props = defineProps<{
   blocks: Block[];
   documentId: number;
+  documentTitle: string;
 }>();
 
 const store = useDocumentsStore();
@@ -52,6 +53,8 @@ async function handleMoveDown(index: number) {
       :block="block"
       :is-first="i === 0"
       :is-last="i === blocks.length - 1"
+      :document-id="documentId"
+      :document-title="documentTitle"
       @update="(c) => handleUpdate(block.id, c)"
       @delete="handleDelete(block.id)"
       @move-up="handleMoveUp(i)"
@@ -63,6 +66,6 @@ async function handleMoveDown(index: number) {
 
 <style scoped>
 .block-list {
-  max-width: 900px;
+  max-width: 1200px;
 }
 </style>

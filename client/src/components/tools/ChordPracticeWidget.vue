@@ -60,7 +60,6 @@ function barreChordData(shape: BarreShape, root: string): DiagramData {
       startFret: n === 0 ? 1 : n,
       barreFret: n === 0 ? undefined : n,
       tab: [
-        // string 6: muted (omitted)
         { string: 5, fret: n },
         { string: 4, fret: n + 2 },
         { string: 3, fret: n + 2 },
@@ -71,8 +70,54 @@ function barreChordData(shape: BarreShape, root: string): DiagramData {
   }
 }
 
+// Em-shape minor barre chord (root on string 6)
+function barreMinorChordData(root: string): DiagramData {
+  const rootIdx = NOTES.indexOf(root);
+  const n = (rootIdx - 4 + 12) % 12;
+  return {
+    label: root + 'm',
+    startFret: n === 0 ? 1 : n,
+    barreFret: n === 0 ? undefined : n,
+    tab: [
+      { string: 6, fret: n },
+      { string: 5, fret: n + 2 },
+      { string: 4, fret: n + 2 },
+      { string: 3, fret: n },
+      { string: 2, fret: n },
+      { string: 1, fret: n },
+    ],
+  };
+}
+
+// ── Chord progression library ─────────────────────────────────────────────────
+interface ProgressionChord {
+  interval: number;   // semitones from key root
+  quality: 'M' | 'm';
+}
+
+interface ProgressionDef {
+  label: string;
+  chords: ProgressionChord[];
+}
+
+const PROGRESSIONS: Record<string, ProgressionDef> = {
+  'I-IV-V':      { label: 'I – IV – V',        chords: [{interval:0,quality:'M'},{interval:5,quality:'M'},{interval:7,quality:'M'}] },
+  'I-IV-V-I':    { label: 'I – IV – V – I',    chords: [{interval:0,quality:'M'},{interval:5,quality:'M'},{interval:7,quality:'M'},{interval:0,quality:'M'}] },
+  'I-V-vi-IV':   { label: 'I – V – vi – IV',   chords: [{interval:0,quality:'M'},{interval:7,quality:'M'},{interval:9,quality:'m'},{interval:5,quality:'M'}] },
+  'I-vi-IV-V':   { label: 'I – vi – IV – V',   chords: [{interval:0,quality:'M'},{interval:9,quality:'m'},{interval:5,quality:'M'},{interval:7,quality:'M'}] },
+  'ii-V-I':      { label: 'ii – V – I',         chords: [{interval:2,quality:'m'},{interval:7,quality:'M'},{interval:0,quality:'M'}] },
+  'i-VII-VI-VII':{ label: 'i – VII – VI – VII', chords: [{interval:0,quality:'m'},{interval:10,quality:'M'},{interval:8,quality:'M'},{interval:10,quality:'M'}] },
+  '12-bar-blues':{ label: '12-Bar Blues',        chords: [
+    {interval:0,quality:'M'},{interval:0,quality:'M'},{interval:0,quality:'M'},{interval:0,quality:'M'},
+    {interval:5,quality:'M'},{interval:5,quality:'M'},{interval:0,quality:'M'},{interval:0,quality:'M'},
+    {interval:7,quality:'M'},{interval:5,quality:'M'},{interval:0,quality:'M'},{interval:7,quality:'M'},
+  ]},
+};
+
+const PROGRESSION_KEYS = Object.keys(PROGRESSIONS);
+
 // ── State ─────────────────────────────────────────────────────────────────────
-const chordType = ref<'open' | 'barre'>('open');
+const chordType = ref<'open' | 'barre' | 'progression'>('open');
 
 // Open chord slots
 const chord1Key = ref('G');
@@ -83,6 +128,10 @@ const barre1Shape = ref<BarreShape>('E');
 const barre1Root  = ref('G');
 const barre2Shape = ref<BarreShape>('A');
 const barre2Root  = ref('C');
+
+// Progression slots
+const progressionKey  = ref('G');
+const progressionName = ref('I-IV-V');
 
 const beatsPerChord = defineModel<number>('beatsPerChord', { default: 1 });
 
@@ -98,6 +147,16 @@ const slot2 = computed<DiagramData>(() =>
     ? { label: OPEN_CHORDS[chord2Key.value].label, tab: OPEN_CHORDS[chord2Key.value].tab, startFret: 1 }
     : barreChordData(barre2Shape.value, barre2Root.value)
 );
+
+const progressionDiagrams = computed<DiagramData[]>(() => {
+  const prog = PROGRESSIONS[progressionName.value];
+  if (!prog) return [];
+  const keyIdx = NOTES.indexOf(progressionKey.value);
+  return prog.chords.map(c => {
+    const chordRoot = NOTES[(keyIdx + c.interval) % 12];
+    return c.quality === 'M' ? barreChordData('E', chordRoot) : barreMinorChordData(chordRoot);
+  });
+});
 
 // ── Randomise ─────────────────────────────────────────────────────────────────
 function randomise() {
@@ -131,11 +190,34 @@ function randomise() {
         <input v-model="chordType" type="radio" value="barre" />
         Barre chords
       </label>
+      <label class="radio-label">
+        <input v-model="chordType" type="radio" value="progression" />
+        Progressions
+      </label>
     </div>
 
     <!-- Controls row -->
     <div class="controls">
-      <button class="randomise-btn" @click="randomise">&#x21ba; Randomise</button>
+      <button v-if="chordType !== 'progression'" class="randomise-btn" @click="randomise">&#x21ba; Randomise</button>
+
+      <!-- Progression selectors -->
+      <template v-if="chordType === 'progression'">
+        <label class="beats-label">
+          Key
+          <select v-model="progressionKey" class="beats-select">
+            <option v-for="note in NOTES" :key="note" :value="note">{{ note }}</option>
+          </select>
+        </label>
+        <label class="beats-label">
+          Progression
+          <select v-model="progressionName" class="progression-select">
+            <option v-for="key in PROGRESSION_KEYS" :key="key" :value="key">
+              {{ PROGRESSIONS[key].label }}
+            </option>
+          </select>
+        </label>
+      </template>
+
       <label class="beats-label">
         Beats per chord
         <select v-model.number="beatsPerChord" class="beats-select">
@@ -147,15 +229,13 @@ function randomise() {
       </label>
     </div>
 
-    <!-- Chord diagrams -->
-    <div class="diagrams">
+    <!-- Open / Barre: two-slot diagrams -->
+    <div v-if="chordType !== 'progression'" class="diagrams">
       <!-- Slot 1 -->
       <div class="diagram-col">
-        <!-- Open: single chord select -->
         <select v-if="chordType === 'open'" v-model="chord1Key" class="chord-select">
           <option v-for="key in OPEN_CHORD_KEYS" :key="key" :value="key">{{ OPEN_CHORDS[key].label }}</option>
         </select>
-        <!-- Barre: shape + root selects -->
         <template v-else>
           <select v-model="barre1Shape" class="chord-select">
             <option value="E">E shape</option>
@@ -199,6 +279,25 @@ function randomise() {
         />
       </div>
     </div>
+
+    <!-- Progression: all chords in a wrapping grid -->
+    <div v-else class="progression-diagrams">
+      <div
+        v-for="(diag, i) in progressionDiagrams"
+        :key="i"
+        class="prog-diagram-col"
+      >
+        <div class="prog-chord-name">{{ diag.label }}</div>
+        <div class="prog-bar-num">{{ i + 1 }}</div>
+        <ChordDiagram
+          :label="diag.label"
+          :tab="diag.tab"
+          :show-label="false"
+          :start-fret="diag.startFret"
+          :barre-fret="diag.barreFret"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -223,6 +322,7 @@ function randomise() {
   display: flex;
   justify-content: center;
   gap: 20px;
+  flex-wrap: wrap;
 }
 
 .radio-label {
@@ -281,7 +381,16 @@ function randomise() {
   padding: 4px 8px;
 }
 
-/* Chord diagrams */
+.progression-select {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  font-size: 0.85rem;
+  padding: 4px 8px;
+}
+
+/* Two-slot chord diagrams */
 .diagrams {
   display: flex;
   align-items: center;
@@ -313,5 +422,33 @@ function randomise() {
   font-size: 1.4rem;
   color: var(--color-text-muted);
   padding-top: 8px;
+}
+
+/* Progression grid */
+.progression-diagrams {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+}
+
+.prog-diagram-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.prog-chord-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.prog-bar-num {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  font-weight: 600;
+  letter-spacing: 0.04em;
 }
 </style>

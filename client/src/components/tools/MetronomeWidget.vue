@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { ref, onUnmounted } from 'vue';
+import { ref, computed, onUnmounted } from 'vue';
 
 const props = withDefaults(defineProps<{ beatsPerChord?: number }>(), { beatsPerChord: 1 });
 
-const BEATS = 4;
+const TIME_SIGNATURES = ['2/4', '3/4', '4/4', '5/4', '6/8', '7/8'] as const;
+
 const MIN_BPM = 20;
 const MAX_BPM = 300;
 const STORAGE_KEY = 'metronome-bpm';
+const TIMESIG_KEY = 'metronome-timesig';
 // How far ahead to schedule audio (seconds)
 const LOOKAHEAD = 0.1;
 // How often the scheduler runs (ms)
@@ -14,16 +16,21 @@ const SCHEDULE_INTERVAL = 25;
 
 const savedBpm = parseInt(localStorage.getItem(STORAGE_KEY) ?? '', 10);
 const initialBpm = !isNaN(savedBpm) ? Math.min(MAX_BPM, Math.max(MIN_BPM, savedBpm)) : 100;
+const savedTimeSig = localStorage.getItem(TIMESIG_KEY);
+const initialTimeSig = (TIME_SIGNATURES as readonly string[]).includes(savedTimeSig ?? '') ? savedTimeSig! : '4/4';
 
 const bpm = ref(initialBpm);
+const timeSig = ref(initialTimeSig);
 const currentBeat = ref(-1); // -1 = stopped
 const running = ref(false);
 const bpmInput = ref(String(initialBpm));
 
+const beats = computed(() => parseInt(timeSig.value.split('/')[0]));
+
 let audioCtx: AudioContext | null = null;
 let schedulerId: ReturnType<typeof setInterval> | null = null;
 let nextBeatTime = 0;   // AudioContext time of the next beat
-let nextBeatIndex = 0;  // which beat (0–3) fires next
+let nextBeatIndex = 0;  // which beat fires next
 
 function getAudioCtx(): AudioContext {
   if (!audioCtx) audioCtx = new AudioContext();
@@ -54,7 +61,7 @@ function scheduler() {
     // Schedule the visual update to fire at the right moment
     const delayMs = Math.max(0, (nextBeatTime - ctx.currentTime) * 1000);
     setTimeout(() => { currentBeat.value = beat; }, delayMs);
-    nextBeatIndex = (nextBeatIndex + 1) % BEATS;
+    nextBeatIndex = (nextBeatIndex + 1) % beats.value;
     nextBeatTime += 60 / bpm.value;
   }
 }
@@ -80,6 +87,14 @@ function stop() {
 
 function toggle() {
   if (running.value) stop(); else start();
+}
+
+function onTimeSigChange(value: string) {
+  const wasRunning = running.value;
+  if (wasRunning) stop();
+  timeSig.value = value;
+  localStorage.setItem(TIMESIG_KEY, value);
+  if (wasRunning) start();
 }
 
 function adjustBpm(delta: number) {
@@ -115,12 +130,27 @@ onUnmounted(() => {
 
 <template>
   <div class="metronome">
-    <div class="section-label">Metronome — 4/4</div>
+    <div class="section-label">Metronome</div>
+
+    <!-- Time signature selector -->
+    <div class="timesig-row">
+      <button
+        v-for="ts in TIME_SIGNATURES"
+        :key="ts"
+        class="timesig-btn"
+        :class="{ selected: timeSig === ts }"
+        :aria-label="`${ts} time signature`"
+        :aria-pressed="timeSig === ts"
+        @click="onTimeSigChange(ts)"
+      >
+        {{ ts }}
+      </button>
+    </div>
 
     <!-- Beat pips -->
     <div class="pips" aria-label="Beat indicator">
       <div
-        v-for="i in BEATS"
+        v-for="i in beats"
         :key="i"
         class="pip"
         :class="{
@@ -179,6 +209,37 @@ onUnmounted(() => {
   color: var(--color-text-muted);
 }
 
+/* Time signature selector */
+.timesig-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.timesig-btn {
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  color: var(--color-text);
+  padding: 5px 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  min-width: 40px;
+}
+
+.timesig-btn:hover:not(.selected) {
+  background: var(--color-border);
+}
+
+.timesig-btn.selected {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
 /* Pips */
 .pips {
   display: flex;
@@ -193,7 +254,6 @@ onUnmounted(() => {
   border: 2px solid var(--color-border);
   transition: background 0.05s, border-color 0.05s, transform 0.05s;
 }
-
 
 .pip.accented.active {
   background: #dc2626;

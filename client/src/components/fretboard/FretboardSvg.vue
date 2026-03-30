@@ -6,7 +6,6 @@ import {
   STRING_COUNT,
   FRET_SPACING,
   STRING_SPACING,
-  PADDING,
   NUT_WIDTH,
   MARKER_RADIUS,
   INLAY_FRETS_12,
@@ -17,12 +16,15 @@ import {
   stringY,
   markerCenter,
   findNearestPosition,
+  type ScaleNote,
 } from '../../composables/useFretboard';
 
 const props = defineProps<{
   fretCount: 12 | 24;
   markers: FretMarker[];
   tuning?: string[];
+  scaleOverlay?: ScaleNote[];
+  scaleLabelMode?: 'note' | 'degree';
 }>();
 
 const emit = defineEmits<{
@@ -36,9 +38,6 @@ const tuning = computed(() => props.tuning || STANDARD_TUNING);
 const inlayFrets = computed(() =>
   props.fretCount === 24 ? INLAY_FRETS_24 : INLAY_FRETS_12
 );
-
-const svgWidth = computed(() => PADDING.left + props.fretCount * FRET_SPACING + PADDING.right);
-const svgHeight = computed(() => PADDING.top + (STRING_COUNT - 1) * STRING_SPACING + PADDING.bottom);
 
 // Generate fret lines
 const fretLines = computed(() => {
@@ -123,8 +122,6 @@ function handleClick(event: MouseEvent) {
   <svg
     ref="svgRef"
     :viewBox="viewBox"
-    :width="svgWidth"
-    :height="svgHeight"
     class="fretboard-svg"
     @click="handleClick"
   >
@@ -185,6 +182,24 @@ function handleClick(event: MouseEvent) {
       fill="#999"
     >{{ fl.fret }}</text>
 
+    <!-- Scale overlay -->
+    <g v-for="(sn, i) in scaleOverlay" :key="'scale-' + i">
+      <circle
+        :cx="sn.cx"
+        :cy="sn.cy"
+        :r="MARKER_RADIUS - 1"
+        :class="sn.isRoot ? 'scale-root' : 'scale-tone'"
+      />
+      <text
+        :x="sn.cx"
+        :y="sn.cy + 4"
+        text-anchor="middle"
+        font-size="8"
+        font-weight="700"
+        class="scale-label"
+      >{{ scaleLabelMode === 'degree' ? sn.degree : sn.noteName }}</text>
+    </g>
+
     <!-- Markers -->
     <g v-for="(m, i) in markerPositions" :key="'marker-' + i">
       <circle
@@ -212,9 +227,25 @@ function handleClick(event: MouseEvent) {
 <style scoped>
 .fretboard-svg {
   cursor: crosshair;
-  max-width: 100%;
+  width: 100%;
   height: auto;
   display: block;
+}
+
+.scale-tone {
+  fill: var(--color-primary);
+  opacity: 0.25;
+}
+
+.scale-root {
+  fill: #e67e22;
+  opacity: 0.5;
+}
+
+.scale-label {
+  fill: var(--color-text);
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .marker {
