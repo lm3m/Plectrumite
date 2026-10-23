@@ -1,35 +1,31 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { randomUUID } from 'crypto';
-import { mkdirSync } from 'fs';
-import { dirname, extname, join } from 'path';
+import { mkdirSync, writeFileSync } from 'fs';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
+import { JSDOM } from 'jsdom';
+import createDOMPurify from 'dompurify';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const uploadsDir = join(__dirname, '..', '..', 'data', 'uploads');
 mkdirSync(uploadsDir, { recursive: true });
 
-const ALLOWED_MIMES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/gif',
-  'image/webp',
-  'image/svg+xml',
-]);
+const DOMPurify = createDOMPurify(new JSDOM('').window);
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadsDir),
-  filename: (_req, file, cb) => {
-    const ext = extname(file.originalname).toLowerCase();
-    cb(null, `${randomUUID()}${ext}`);
-  },
-});
+const MIME_EXTENSIONS: Record<string, string> = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/gif': '.gif',
+  'image/webp': '.webp',
+  'image/svg+xml': '.svg',
+};
 
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 }, // 10 MB
   fileFilter: (_req, file, cb) => {
-    if (ALLOWED_MIMES.has(file.mimetype)) {
+    if (Object.prototype.hasOwnProperty.call(MIME_EXTENSIONS, file.mimetype)) {
       cb(null, true);
     } else {
       cb(new Error('Only JPEG, PNG, GIF, WebP, and SVG images are allowed'));
@@ -57,9 +53,21 @@ router.post('/', (req, res) => {
       res.status(400).json({ error: 'No file provided' });
       return;
     }
+
+    const ext = MIME_EXTENSIONS[req.file.mimetype];
+    const filename = `${randomUUID()}${ext}`;
+    let contents = req.file.buffer;
+    if (req.file.mimetype === 'image/svg+xml') {
+      const sanitized = DOMPurify.sanitize(contents.toString('utf-8'), {
+        USE_PROFILES: { svg: true, svgFilters: true },
+      });
+      contents = Buffer.from(sanitized, 'utf-8');
+    }
+    writeFileSync(join(uploadsDir, filename), contents);
+
     res.status(201).json({
-      url: `/uploads/${req.file.filename}`,
-      filename: req.file.filename,
+      url: `/uploads/${filename}`,
+      filename,
     });
   });
 });
