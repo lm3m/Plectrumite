@@ -1,5 +1,9 @@
 # ---- Stage 1: Build client and server ----
-FROM node:20-alpine AS build
+FROM node:24-alpine AS build
+
+# better-sqlite3 has no prebuilt binary for this Node/musl combo, so the
+# server's npm ci compiles it here too (same toolchain as the deps stage).
+RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
@@ -26,7 +30,7 @@ RUN cd server && npm run build
 
 # ---- Stage 2: Production dependencies ----
 # Separate stage because better-sqlite3 requires native compilation tools
-FROM node:20-alpine AS deps
+FROM node:24-alpine AS deps
 
 RUN apk add --no-cache python3 make g++
 
@@ -35,7 +39,7 @@ COPY server/package.json server/package-lock.json ./
 RUN npm ci --omit=dev
 
 # ---- Stage 3: Production runtime ----
-FROM node:20-alpine
+FROM node:24-alpine
 
 WORKDIR /app
 
